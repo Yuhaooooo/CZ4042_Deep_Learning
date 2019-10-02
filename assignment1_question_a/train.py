@@ -88,8 +88,8 @@ def train(param):
             for i in range(1, (epochs + 1)):
                 num_of_batch = trainX.shape[0] // batch_size + 1
                 for j in range(num_of_batch):
-                    first_index = (j - 1) * batch_size
-                    last_index = j * batch_size
+                    first_index = j * batch_size
+                    last_index = (j + 1) * batch_size
                     if last_index > len(trainX):
                         last_index = len(trainX)
                     train_op.run(feed_dict={x: trainX[first_index:last_index], y_:
@@ -102,12 +102,12 @@ def train(param):
 
             return train_acc, test_acc
     if param['required'] == 'cross-validation accuracy':
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            cross_validation_values = []
-            fold_size = trainX.shape[0] // 5
-            fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
-            for i in range(0, 5):
+        cross_validation_accuracies = [[], [], [], [], []]
+        for i in range(0, 5):
+            with tf.Session() as sess:
+                sess.run(tf.global_variables_initializer())
+                fold_size = trainX.shape[0] // 5
+                fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
                 fold_trainX = trainX[0:fold_indexes[i]]
                 fold_trainX = np.concatenate((fold_trainX, trainX[fold_indexes[i+1]:fold_indexes[5]]), axis=0)
                 fold_testX = trainX[fold_indexes[i]:fold_indexes[i+1]]
@@ -115,16 +115,21 @@ def train(param):
                 fold_trainY = np.concatenate((fold_trainY, trainY[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
                 fold_testY = trainY[fold_indexes[i]:fold_indexes[i + 1]]
                 num_of_batch = fold_trainX.shape[0] // batch_size + 1
-                for i in range(1, (epochs + 1)):
-                    for j in range(num_of_batch):
-                        first_index = (j - 1) * batch_size
-                        last_index = j * batch_size
+                for j in range(1, (epochs + 1)):
+                    for k in range(num_of_batch):
+                        first_index = k * batch_size
+                        last_index = (k + 1) * batch_size
                         if last_index > len(fold_trainX):
                             last_index = len(fold_trainX)
                         train_op.run(feed_dict={x: fold_trainX[first_index:last_index],
                                                 y_: fold_trainY[first_index:last_index]})
-                    if i % 100 == 0:
-                        print(str(i) + 'epoch')
-                cross_validation_values.append(error.eval(feed_dict={x: fold_testX, y_: fold_testY}))
-                print(cross_validation_values)
-            return sum(cross_validation_values) / len(cross_validation_values)
+                    cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x: fold_testX, y_: fold_testY}))
+                    if j % 100 == 0:
+                        print('iter %d: cross validation accuracy %g' % (j, cross_validation_accuracies[i][j - 1]))
+        five_fold_average_cross_validation_accuracies = []
+        for i in range(0, epochs):
+            sum_accuracies = 0
+            for j in range(0, 5):
+                sum_accuracies += cross_validation_accuracies[j][i]
+            five_fold_average_cross_validation_accuracies.append(sum_accuracies / 5)
+        return five_fold_average_cross_validation_accuracies
