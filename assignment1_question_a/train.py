@@ -1,6 +1,7 @@
 import math
 import tensorflow as tf
 import numpy as np
+import time
 
 NUM_FEATURES = 21
 NUM_CLASSES = 3
@@ -75,9 +76,6 @@ def train(param):
         correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
         correct_prediction = tf.cast(correct_prediction, tf.float32)
         accuracy = tf.reduce_mean(correct_prediction)
-
-    with tf.name_scope('error'):
-        error = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y))
         
     if param['required'] == 'train accuracy and test accuracy':
         with tf.Session() as sess:
@@ -102,6 +100,7 @@ def train(param):
 
             return train_acc, test_acc
     if param['required'] == 'cross-validation accuracy':
+        time_taken = 0
         cross_validation_accuracies = [[], [], [], [], []]
         for i in range(0, 5):
             with tf.Session() as sess:
@@ -116,6 +115,7 @@ def train(param):
                 fold_testY = trainY[fold_indexes[i]:fold_indexes[i + 1]]
                 num_of_batch = fold_trainX.shape[0] // batch_size + 1
                 for j in range(1, (epochs + 1)):
+                    t = time.time()
                     for k in range(num_of_batch):
                         first_index = k * batch_size
                         last_index = (k + 1) * batch_size
@@ -123,6 +123,7 @@ def train(param):
                             last_index = len(fold_trainX)
                         train_op.run(feed_dict={x: fold_trainX[first_index:last_index],
                                                 y_: fold_trainY[first_index:last_index]})
+                    time_taken += time.time() - t
                     cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x: fold_testX, y_: fold_testY}))
                     if j % 100 == 0:
                         print('iter %d: cross validation accuracy %g' % (j, cross_validation_accuracies[i][j - 1]))
@@ -132,4 +133,7 @@ def train(param):
             for j in range(0, 5):
                 sum_accuracies += cross_validation_accuracies[j][i]
             five_fold_average_cross_validation_accuracies.append(sum_accuracies / 5)
-        return five_fold_average_cross_validation_accuracies
+
+        time_for_one_epoch = time_taken * 1000 / epochs / 5
+
+        return [five_fold_average_cross_validation_accuracies, time_for_one_epoch]
