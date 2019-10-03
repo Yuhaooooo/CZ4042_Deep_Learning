@@ -126,7 +126,7 @@ def train(param):
                     time_taken += time.time() - t
                     cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x: fold_testX, y_: fold_testY}))
                     if j % 100 == 0:
-                        print('iter %d: cross validation accuracy %g' % (j, cross_validation_accuracies[i][j - 1]))
+                        print('fold %d, iter %d: cross validation accuracy %g' % (i, j, cross_validation_accuracies[i][j - 1]))
         five_fold_average_cross_validation_accuracies = []
         for i in range(0, epochs):
             sum_accuracies = 0
