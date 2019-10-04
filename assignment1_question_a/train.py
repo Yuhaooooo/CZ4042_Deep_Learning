@@ -9,7 +9,7 @@ NUM_CLASSES = 3
 learning_rate = 0.01
 epochs = 5000
 seed = 10
-np.random.seed(seed)
+np.random.seed(int(time.time()))
 
 
 def scale(X, X_min, X_max):
@@ -22,7 +22,9 @@ def train(param):
     weight_decay_parameter = param['weight_decay_parameter']
 
     train_input = np.genfromtxt('ctg_data_cleaned.csv', delimiter=',')
-    allX, allY = train_input[1:, :21], train_input[1:, -1].astype(int)
+    train_input = train_input[1:]
+    np.random.shuffle(train_input)
+    allX, allY = train_input[0:, :21], train_input[0:, -1].astype(int)
     allX = scale(allX, np.min(allX, axis=0), np.max(allX, axis=0))
 
     all_x_length = allX.shape[0]
@@ -39,30 +41,31 @@ def train(param):
     testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
 
     # construct the ffn
-    x = tf.placeholder(tf.float32, [None, NUM_FEATURES])
-    y_ = tf.placeholder(tf.float32, [None, NUM_CLASSES])
+    if param['hidden_layer_num'] == 1:
+        x = tf.placeholder(tf.float32, [None, NUM_FEATURES])
+        y_ = tf.placeholder(tf.float32, [None, NUM_CLASSES])
 
-    weights_hidden = tf.Variable(
-        tf.truncated_normal(
-            [NUM_FEATURES, hidden_layer_neuron_num],
-            stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
-        name='weights')
-    biases_hidden = tf.Variable(
-        tf.zeros([hidden_layer_neuron_num]),
-        name='biases')
-    hidden = tf.nn.relu(tf.matmul(x, weights_hidden) + biases_hidden)
-    weights_out = tf.Variable(
-        tf.truncated_normal(
-            [hidden_layer_neuron_num, NUM_CLASSES],
-            stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
-        name='weights')
-    biases_out = tf.Variable(
-        tf.zeros([NUM_CLASSES]),
-        name='biases')
-    logits = tf.matmul(hidden, weights_out) + biases_out
-    regularization = tf.nn.l2_loss(weights_out) + tf.nn.l2_loss(weights_hidden)
+        weights_hidden = tf.Variable(
+            tf.truncated_normal(
+                [NUM_FEATURES, hidden_layer_neuron_num],
+                stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
+            name='weights')
+        biases_hidden = tf.Variable(
+            tf.zeros([hidden_layer_neuron_num]),
+            name='biases')
+        hidden = tf.nn.relu(tf.matmul(x, weights_hidden) + biases_hidden)
+        weights_out = tf.Variable(
+            tf.truncated_normal(
+                [hidden_layer_neuron_num, NUM_CLASSES],
+                stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
+            name='weights')
+        biases_out = tf.Variable(
+            tf.zeros([NUM_CLASSES]),
+            name='biases')
+        logits = tf.matmul(hidden, weights_out) + biases_out
+        regularization = tf.nn.l2_loss(weights_out) + tf.nn.l2_loss(weights_hidden)
 
-    y = logits
+        y = logits
 
     with tf.name_scope('cross_entropy'):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y)
@@ -102,11 +105,11 @@ def train(param):
     if param['required'] == 'cross-validation accuracy':
         time_taken = 0
         cross_validation_accuracies = [[], [], [], [], []]
+        fold_size = trainX.shape[0] // 5
+        fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
         for i in range(0, 5):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
-                fold_size = trainX.shape[0] // 5
-                fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
                 fold_trainX = trainX[0:fold_indexes[i]]
                 fold_trainX = np.concatenate((fold_trainX, trainX[fold_indexes[i+1]:fold_indexes[5]]), axis=0)
                 fold_testX = trainX[fold_indexes[i]:fold_indexes[i+1]]
