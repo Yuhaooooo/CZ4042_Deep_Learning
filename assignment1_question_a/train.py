@@ -7,7 +7,7 @@ NUM_FEATURES = 21
 NUM_CLASSES = 3
 
 learning_rate = 0.01
-epochs = 5000
+epochs = 20000
 seed = 10
 np.random.seed(int(time.time()))
 
@@ -65,7 +65,44 @@ def train(param):
         logits = tf.matmul(hidden, weights_out) + biases_out
         regularization = tf.nn.l2_loss(weights_out) + tf.nn.l2_loss(weights_hidden)
 
-        y = logits
+    else:   # hidden_layer_num == 2
+        x = tf.placeholder(tf.float32, [None, NUM_FEATURES])
+        y_ = tf.placeholder(tf.float32, [None, NUM_CLASSES])
+
+        weights_hidden_1 = tf.Variable(
+            tf.truncated_normal(
+                [NUM_FEATURES, hidden_layer_neuron_num],
+                stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
+            name='weights')
+        biases_hidden_1 = tf.Variable(
+            tf.zeros([hidden_layer_neuron_num]),
+            name='biases')
+
+        hidden1 = tf.nn.relu(tf.matmul(x, weights_hidden_1) + biases_hidden_1)
+
+        weights_hidden_2 = tf.Variable(
+            tf.truncated_normal(
+                [hidden_layer_neuron_num, hidden_layer_neuron_num],
+                stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
+            name='weights')
+        biases_hidden_2 = tf.Variable(
+            tf.zeros([hidden_layer_neuron_num]),
+            name='biases')
+
+        hidden2 = tf.nn.relu(tf.matmul(hidden1, weights_hidden_2) + biases_hidden_2)
+
+        weights_out = tf.Variable(
+            tf.truncated_normal(
+                [hidden_layer_neuron_num, NUM_CLASSES],
+                stddev=1.0 / math.sqrt(float(NUM_FEATURES))),
+            name='weights')
+        biases_out = tf.Variable(
+            tf.zeros([NUM_CLASSES]),
+            name='biases')
+        logits = tf.matmul(hidden2, weights_out) + biases_out
+        regularization = tf.nn.l2_loss(weights_out) + tf.nn.l2_loss(weights_hidden_1) + tf.nn.l2_loss(weights_hidden_2)
+
+    y = logits
 
     with tf.name_scope('cross_entropy'):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y)
@@ -102,6 +139,7 @@ def train(param):
                     print('iter %d: test accuracy %g' % (i, test_acc[i - 1]))
 
             return train_acc, test_acc
+
     if param['required'] == 'cross-validation accuracy':
         time_taken = 0
         cross_validation_accuracies = [[], [], [], [], []]
