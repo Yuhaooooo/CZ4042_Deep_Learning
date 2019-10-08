@@ -7,7 +7,7 @@ NUM_FEATURES = 21
 NUM_CLASSES = 3
 
 learning_rate = 0.01
-epochs = 5000
+epochs = 10000
 seed = 10
 np.random.seed(int(time.time()))
 
@@ -92,8 +92,7 @@ def train_and_return_cross_validation_accuray_and_time_per_epoch(accuracy, batch
                 time_taken += time.time() - t
                 cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x: fold_testX, y_: fold_testY}))
                 if j % 100 == 0:
-                    print('fold %d, iter %d: cross validation accuracy %g' % (
-                    i, j, cross_validation_accuracies[i][j - 1]))
+                    print('fold %d, iter %d: cross validation accuracy %g' % (i, j, cross_validation_accuracies[i][j - 1]))
     five_fold_average_cross_validation_accuracies = []
     for i in range(0, epochs):
         sum_accuracies = 0
