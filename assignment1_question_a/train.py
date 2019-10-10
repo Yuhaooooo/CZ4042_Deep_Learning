@@ -7,7 +7,7 @@ NUM_FEATURES = 21
 NUM_CLASSES = 3
 
 learning_rate = 0.01
-epochs = 10000
+epochs = 20000
 seed = 10
 np.random.seed(int(time.time()))
 
@@ -37,15 +37,12 @@ def get_data():
     testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
     return (trainX, trainY, testX, testY)
 
-def train_and_return_train_and_test_accuracy(accuracy, batch_size, train_op, x, y_):
+def train_and_return_train_and_test_accuracy(data, accuracy, batch_size, train_op, x, y_):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         train_acc = []
         test_acc = []
-
-        trainX, trainY, testX, testY = get_data()
-
-
+        trainX, trainY, testX, testY = data
         for i in range(1, (epochs + 1)):
             num_of_batch = trainX.shape[0] // batch_size + 1
             for j in range(num_of_batch):
@@ -60,12 +57,11 @@ def train_and_return_train_and_test_accuracy(accuracy, batch_size, train_op, x, 
             if i % 100 == 0:
                 print('iter %d: train accuracy %g' % (i, train_acc[i - 1]))
                 print('iter %d: test accuracy %g' % (i, test_acc[i - 1]))
-
         return train_acc, test_acc
 
 
-def train_and_return_cross_validation_accuray_and_time_per_epoch(accuracy, batch_size,train_op, x, y_):
-    trainX, trainY, testX, testY = get_data()
+def train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy, batch_size,train_op, x, y_):
+    trainX, trainY, testX, testY = data
     time_taken = 0
     cross_validation_accuracies = [[], [], [], [], []]
     fold_size = trainX.shape[0] // 5
@@ -90,9 +86,10 @@ def train_and_return_cross_validation_accuray_and_time_per_epoch(accuracy, batch
                     train_op.run(feed_dict={x: fold_trainX[first_index:last_index],
                                             y_: fold_trainY[first_index:last_index]})
                 time_taken += time.time() - t
-                cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x: fold_testX, y_: fold_testY}))
+                cross_validation_accuracies[i].append(accuracy.eval(feed_dict={x:fold_testX, y_:fold_testY}))
                 if j % 100 == 0:
-                    print('fold %d, iter %d: cross validation accuracy %g' % (i, j, cross_validation_accuracies[i][j - 1]))
+                    print('fold %d, iter %d: cross validation accuracy %g' 
+                          % (i, j,cross_validation_accuracies[i][j - 1]))
     five_fold_average_cross_validation_accuracies = []
     for i in range(0, epochs):
         sum_accuracies = 0
@@ -166,6 +163,7 @@ def train(param):
     batch_size = param['batch_size']
     hidden_layer_neuron_num = param['hidden_layer_neuron_num']
     weight_decay_parameter = param['weight_decay_parameter']
+    data = param['data']
 
     # construct the ffn
     if param['hidden_layer_num'] == 1:
@@ -187,9 +185,9 @@ def train(param):
         accuracy = tf.reduce_mean(correct_prediction)
         
     if param['required'] == 'train accuracy and test accuracy':
-        return train_and_return_train_and_test_accuracy(accuracy, batch_size,  train_op, x, y_)
+        return train_and_return_train_and_test_accuracy(data, accuracy, batch_size,  train_op, x, y_)
 
     if param['required'] == 'cross-validation accuracy':
-        return train_and_return_cross_validation_accuray_and_time_per_epoch(accuracy, batch_size, train_op, x, y_)
+        return train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy, batch_size, train_op, x, y_)
 
 
