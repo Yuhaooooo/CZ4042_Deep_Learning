@@ -12,39 +12,47 @@ seed = 10
 np.random.seed(int(time.time()))
 
 
+def divide_data_for_training_and_testing():
+    # extract all the data from the csv file, divide them into 30% for testing and 70% for training
+    train_input = np.genfromtxt('ctg_data_cleaned.csv', delimiter=',')
+    train_input = train_input[1:]
+    train_input_length = train_input.shape[0]
+    np.random.shuffle(train_input)
+    train_data = train_input[:int(train_input_length * 0.7)]
+    test_data = train_input[int(train_input_length * 0.7):]
+    np.save('train_data', train_data)
+    np.save('test_data', test_data)
+
 def scale(X, X_min, X_max):
     return (X - X_min) / (X_max - X_min)
 
 
 def get_data():
-    # extract all the data from the csv file, divide them into 30% for testing and 70% for training
-    train_input = np.genfromtxt('ctg_data_cleaned.csv', delimiter=',')
-    train_input = train_input[1:]
-    np.random.shuffle(train_input)
-    allX, allY = train_input[0:, :21], train_input[0:, -1].astype(int)
-    allX = scale(allX, np.min(allX, axis=0), np.max(allX, axis=0))
+    train_data = np.load('test_data')
+    test_data = np.load('load_data')
+    return train_data, test_data
 
-    all_x_length = allX.shape[0]
-    all_y_length = allY.shape[0]
-
-    trainX = allX[:int(all_x_length * 0.7)]
-    testX = allX[int(all_x_length * 0.7):]
-
-    trainY_temp = allY[:int(all_x_length * 0.7)]
-    testY_temp = allY[int(all_x_length * 0.7):]
-    trainY = np.zeros((trainY_temp.shape[0], NUM_CLASSES))
-    trainY[np.arange(trainY_temp.shape[0]), trainY_temp - 1] = 1  # one hot matrix
-    testY = np.zeros((testY_temp.shape[0], NUM_CLASSES))
-    testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
-    return (trainX, trainY, testX, testY)
 
 def train_and_return_train_and_test_accuracy(data, accuracy, batch_size, train_op, x, y_):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         train_acc = []
         test_acc = []
-        trainX, trainY, testX, testY = data
+        train_data, test_data = data
         for i in range(1, (epochs + 1)):
+            # shuffle the train data
+            np.random.shuffle(train_data)
+            trainX, trainY_temp = train_data[0:, :21], train_data[0:, -1].astype(int)
+            testX, testY_temp = test_data[0:, :21], test_data[0:, -1].astype(int)
+            allX = np.append(trainX, testX, axis=0)
+            allX = scale(allX, np.min(allX, axis=0), np.max(allX, axis=0))
+            allX_length = allX.shape[0]
+            trainX = allX[:int(allX_length * 0.7)]
+            testX = allX[int(allX_length * 0.7):]
+            trainY = np.zeros((trainY_temp.shape[0], NUM_CLASSES))
+            trainY[np.arange(trainY_temp.shape[0]), trainY_temp - 1] = 1  # one hot matrix
+            testY = np.zeros((testY_temp.shape[0], NUM_CLASSES))
+            testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
             num_of_batch = trainX.shape[0] // batch_size + 1
             for j in range(num_of_batch):
                 first_index = j * batch_size
