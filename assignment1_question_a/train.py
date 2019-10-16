@@ -17,6 +17,7 @@ def scale(X, X_min, X_max):
 
 
 def get_data():
+    # extract all the data from the csv file, divide them into 30% for testing and 70% for training
     train_input = np.genfromtxt('ctg_data_cleaned.csv', delimiter=',')
     train_input = train_input[1:]
     np.random.shuffle(train_input)
@@ -69,6 +70,7 @@ def train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy,
     for i in range(0, 5):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
+            # divide the data into 5 fold
             fold_trainX = trainX[0:fold_indexes[i]]
             fold_trainX = np.concatenate((fold_trainX, trainX[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
             fold_testX = trainX[fold_indexes[i]:fold_indexes[i + 1]]
@@ -91,6 +93,7 @@ def train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy,
                     print('fold %d, iter %d: cross validation accuracy %g' 
                           % (i, j,cross_validation_accuracies[i][j - 1]))
     five_fold_average_cross_validation_accuracies = []
+    # calculate the average validation accuracies for the five folds
     for i in range(0, epochs):
         sum_accuracies = 0
         for j in range(0, 5):
