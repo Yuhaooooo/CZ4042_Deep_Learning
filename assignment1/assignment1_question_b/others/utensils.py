@@ -16,21 +16,15 @@ from keras.regularizers import l2
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-csv_file = 'admission_predict.csv'
+def load_data(index=0):
+    if index==0:
+        return np.load('./npy/X_train.npy'), np.load('./npy/X_test.npy'), np.load('./npy/y_train.npy'), np.load('./npy/y_test.npy')
 
-df = pd.read_csv(csv_file, index_col=[0])
+    elif index==1:
+        return np.load('./npy/X_train_removed1.npy'), np.load('./npy/X_test_removed1.npy'), np.load('./npy/y_train_removed1.npy'), np.load('./npy/y_test_removed1.npy')
 
-data = df.values
-
-X = data[:, :-1]
-y = data[:, -1].reshape(-1,1)
-
-def scale(X, decimals):
-    return np.round((X - np.mean(X, axis=0))/ np.std(X, axis=0), decimals=decimals)
-
-X = scale(X, 4)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    elif index==2:
+        return np.load('./npy/X_train_removed2.npy'), np.load('./npy/X_test_removed2.npy'), np.load('./npy/y_train_removed2.npy'), np.load('./npy/y_test_removed2.npy')
 
 
 
