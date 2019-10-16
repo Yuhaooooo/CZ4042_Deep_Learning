@@ -23,36 +23,41 @@ def divide_data_for_training_and_testing():
     np.save('train_data', train_data)
     np.save('test_data', test_data)
 
+
 def scale(X, X_min, X_max):
     return (X - X_min) / (X_max - X_min)
 
 
 def get_data():
-    train_data = np.load('test_data')
-    test_data = np.load('load_data')
+    train_data = np.load('train_data.npy')
+    test_data = np.load('test_data.npy')
     return train_data, test_data
 
 
-def train_and_return_train_and_test_accuracy(data, accuracy, batch_size, train_op, x, y_):
+def shuffle_data(train_data, test_data):
+    np.random.shuffle(train_data)
+    trainX, trainY_temp = train_data[0:, :21], train_data[0:, -1].astype(int)
+    testX, testY_temp = test_data[0:, :21], test_data[0:, -1].astype(int)
+    allX = np.append(trainX, testX, axis=0)
+    allX = scale(allX, np.min(allX, axis=0), np.max(allX, axis=0))
+    allX_length = allX.shape[0]
+    trainX = allX[:int(allX_length * 0.7)]
+    testX = allX[int(allX_length * 0.7):]
+    trainY = np.zeros((trainY_temp.shape[0], NUM_CLASSES))
+    trainY[np.arange(trainY_temp.shape[0]), trainY_temp - 1] = 1  # one hot matrix
+    testY = np.zeros((testY_temp.shape[0], NUM_CLASSES))
+    testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
+    return trainX, trainY, testX, testY
+
+
+def train_and_return_train_and_test_accuracy(accuracy, batch_size, train_op, x, y_):
+    train_data, test_data = get_data()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         train_acc = []
         test_acc = []
-        train_data, test_data = data
         for i in range(1, (epochs + 1)):
-            # shuffle the train data
-            np.random.shuffle(train_data)
-            trainX, trainY_temp = train_data[0:, :21], train_data[0:, -1].astype(int)
-            testX, testY_temp = test_data[0:, :21], test_data[0:, -1].astype(int)
-            allX = np.append(trainX, testX, axis=0)
-            allX = scale(allX, np.min(allX, axis=0), np.max(allX, axis=0))
-            allX_length = allX.shape[0]
-            trainX = allX[:int(allX_length * 0.7)]
-            testX = allX[int(allX_length * 0.7):]
-            trainY = np.zeros((trainY_temp.shape[0], NUM_CLASSES))
-            trainY[np.arange(trainY_temp.shape[0]), trainY_temp - 1] = 1  # one hot matrix
-            testY = np.zeros((testY_temp.shape[0], NUM_CLASSES))
-            testY[np.arange(testY_temp.shape[0]), testY_temp - 1] = 1  # one hot matrix
+            trainX, trainY, testX, testY = shuffle_data(train_data, test_data)
             num_of_batch = trainX.shape[0] // batch_size + 1
             for j in range(num_of_batch):
                 first_index = j * batch_size
@@ -69,24 +74,28 @@ def train_and_return_train_and_test_accuracy(data, accuracy, batch_size, train_o
         return train_acc, test_acc
 
 
-def train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy, batch_size,train_op, x, y_):
-    trainX, trainY, testX, testY = data
+def train_and_return_cross_validation_accuracy_and_time_per_epoch(accuracy, batch_size, train_op, x, y_):
     time_taken = 0
     cross_validation_accuracies = [[], [], [], [], []]
-    fold_size = trainX.shape[0] // 5
-    fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
+    train_data, test_data = get_data()
     for i in range(0, 5):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            # divide the data into 5 fold
-            fold_trainX = trainX[0:fold_indexes[i]]
-            fold_trainX = np.concatenate((fold_trainX, trainX[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
-            fold_testX = trainX[fold_indexes[i]:fold_indexes[i + 1]]
-            fold_trainY = trainY[0:fold_indexes[i]]
-            fold_trainY = np.concatenate((fold_trainY, trainY[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
-            fold_testY = trainY[fold_indexes[i]:fold_indexes[i + 1]]
-            num_of_batch = fold_trainX.shape[0] // batch_size + 1
+
             for j in range(1, (epochs + 1)):
+                trainX, trainY, testX, testY = shuffle_data(train_data, test_data)
+
+                # divide the data into 5 fold
+                fold_size = trainX.shape[0] // 5
+                fold_indexes = [0, fold_size, fold_size * 2, fold_size * 3, fold_size * 4, trainX.shape[0]]
+                fold_trainX = trainX[0:fold_indexes[i]]
+                fold_trainX = np.concatenate((fold_trainX, trainX[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
+                fold_testX = trainX[fold_indexes[i]:fold_indexes[i + 1]]
+                fold_trainY = trainY[0:fold_indexes[i]]
+                fold_trainY = np.concatenate((fold_trainY, trainY[fold_indexes[i + 1]:fold_indexes[5]]), axis=0)
+                fold_testY = trainY[fold_indexes[i]:fold_indexes[i + 1]]
+                num_of_batch = fold_trainX.shape[0] // batch_size + 1
+
                 t = time.time()
                 for k in range(num_of_batch):
                     first_index = k * batch_size
@@ -174,7 +183,6 @@ def train(param):
     batch_size = param['batch_size']
     hidden_layer_neuron_num = param['hidden_layer_neuron_num']
     weight_decay_parameter = param['weight_decay_parameter']
-    data = param['data']
 
     # construct the ffn
     if param['hidden_layer_num'] == 1:
@@ -196,9 +204,9 @@ def train(param):
         accuracy = tf.reduce_mean(correct_prediction)
         
     if param['required'] == 'train accuracy and test accuracy':
-        return train_and_return_train_and_test_accuracy(data, accuracy, batch_size,  train_op, x, y_)
+        return train_and_return_train_and_test_accuracy(accuracy, batch_size,  train_op, x, y_)
 
     if param['required'] == 'cross-validation accuracy':
-        return train_and_return_cross_validation_accuray_and_time_per_epoch(data, accuracy, batch_size, train_op, x, y_)
+        return train_and_return_cross_validation_accuracy_and_time_per_epoch(accuracy, batch_size, train_op, x, y_)
 
 
