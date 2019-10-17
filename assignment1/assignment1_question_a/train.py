@@ -7,7 +7,7 @@ NUM_FEATURES = 21
 NUM_CLASSES = 3
 
 learning_rate = 0.01
-epochs = 100
+epochs = 20000
 seed = 10
 np.random.seed(int(time.time()))
 
