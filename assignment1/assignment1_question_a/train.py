@@ -29,8 +29,8 @@ def scale(X, X_min, X_max):
 
 
 def get_data():
-    train_data = np.load('train_data.npy')
-    test_data = np.load('test_data.npy')
+    train_data = np.load('./Others/npy/train_data.npy')
+    test_data = np.load('./Others/npy/test_data.npy')
     return train_data, test_data
 
 
