@@ -48,8 +48,8 @@ def main():
     plt.show()
 
     # plot for (c)
-    param5['required'] = 'train accuracy and test accuracy'
-    acc = train(param5)
+    param2['required'] = 'train accuracy and test accuracy'
+    acc = train(param2)
     plt.figure()
     plt.plot(range(epochs), acc[0], label='Train Accuracy')
     plt.plot(range(epochs), acc[1], label='Test Accuracy')
