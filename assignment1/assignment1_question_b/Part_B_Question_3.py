@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 
 # sklearn
 from sklearn.model_selection import train_test_split
@@ -13,9 +14,9 @@ from keras import optimizers
 from keras.regularizers import l2
 
 
-csv_file = 'others/admission_predict.csv'
+csv_file = os.path.join('others', 'admission_predict.csv')
 df = pd.read_csv(csv_file, index_col=[0])
-X_train, X_test, y_train, y_test = np.load('others/npy/X_train.npy'), np.load('others/npy/X_test.npy'), np.load('others/npy/y_train.npy'), np.load('others/npy/y_test.npy') 
+X_train, X_test, y_train, y_test = np.load(os.path.join('others', 'npy', 'X_train.npy')), np.load(os.path.join('others', 'npy', 'X_test.npy')), np.load(os.path.join('others', 'npy', 'y_train.npy')), np.load(os.path.join('others', 'npy', 'y_test.npy'))
 lr = 1e-3
 decay = 1e-3
 batch_size = 8
@@ -101,8 +102,8 @@ print('\n\n', '-'*10, '  Question 3(b)  ', '-'*10, '\n\n')
 feature2_removed_index = remove_second_feature(feature1_removed_index)
 X_train, X_test = np.delete(X_train, obj=feature2_removed_index, axis=1), np.delete(X_test, obj=feature2_removed_index, axis=1)
 
-np.save('others/npy/X_train2.npy', X_train)
-np.save('others/npy/X_test2.npy', X_test)
+np.save(os.path.join('others', 'npy', 'X_train2.npy'), X_train)
+np.save(os.path.join('others', 'npy', 'X_test2.npy'), X_test)
 
 print(X_train.shape, X_test.shape)
 print('The new train and test dataset is save in others/npy/X_train2.npy and others/npy/X_test2.npy')

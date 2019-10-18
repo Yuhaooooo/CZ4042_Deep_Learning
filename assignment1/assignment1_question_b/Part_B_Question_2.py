@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
+import os
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-csv_file = 'others/admission_predict.csv'
+csv_file = os.path.join('others', 'admission_predict.csv')
 
 df = pd.read_csv(csv_file, index_col=[0])
 
@@ -17,7 +18,7 @@ ax = sns.heatmap(
     square=True
 )
 
-plt.savefig("others/plot/q2/correlationMap.png")
+plt.savefig(os.path.join("others", "plot", "q2", "correlationMap.png"))
 
 max_corr_extent=0
 max_corr_index=(-1,-1)

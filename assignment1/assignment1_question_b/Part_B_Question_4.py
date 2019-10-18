@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 
 # sklearn
 from sklearn.model_selection import train_test_split
@@ -14,7 +15,7 @@ from keras.regularizers import l2
 
 import matplotlib.pyplot as plt
 
-X_train, X_test, y_train, y_test = np.load('others/npy/X_train2.npy'), np.load('others/npy/X_test2.npy'), np.load('others/npy/y_train.npy'), np.load('others/npy/y_test.npy') 
+X_train, X_test, y_train, y_test = np.load(os.path.join('others', 'npy', 'X_train2.npy')), np.load(os.path.join('others', 'npy', 'X_test2.npy')), np.load(os.path.join('others', 'npy', 'y_train.npy')), np.load(os.path.join('others', 'npy', 'y_test.npy'))
 
 epochs=20000
 epochs_interval =100
@@ -127,4 +128,4 @@ for i in range(5):
 plt.title('mse')
 plt.xlabel('epoch')
 plt.legend(models_str, loc='upper left')
-plt.savefig('others/plot/q4/model_comparision')
+plt.savefig(os.path.join('others', 'plot', 'q4', 'model_comparision'))
