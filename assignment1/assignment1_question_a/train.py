@@ -2,6 +2,7 @@ import math
 import tensorflow as tf
 import numpy as np
 import time
+import os
 
 NUM_FEATURES = 21
 NUM_CLASSES = 3
@@ -29,8 +30,10 @@ def scale(X, X_min, X_max):
 
 
 def get_data():
-    train_data = np.load('./Others/npy/train_data.npy')
-    test_data = np.load('./Others/npy/test_data.npy')
+    train_data_path = os.path.join('.', 'others', 'npy', 'train_data.npy')
+    test_data_path = os.path.join('.', 'others', 'npy', 'test_data.npy')
+    train_data = np.load(train_data_path)
+    test_data = np.load(test_data_path)
     return train_data, test_data
 
 

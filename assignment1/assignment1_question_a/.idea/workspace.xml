@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="560497f8-36da-4402-a889-bd5f1b67a731" name="Default Changelist" comment="" />
+    <list default="true" id="560497f8-36da-4402-a889-bd5f1b67a731" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,7 +35,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Part_A_Question_5">
+  <component name="RunManager" selected="Python.Part_A_Question_2">
     <configuration name="Part_A_Question_1" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="assignment1_question_a" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -140,11 +143,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Part_A_Question_5" />
         <item itemvalue="Python.Part_A_Question_2" />
+        <item itemvalue="Python.Part_A_Question_1" />
+        <item itemvalue="Python.Part_A_Question_5" />
         <item itemvalue="Python.Part_A_Question_4" />
         <item itemvalue="Python.Part_A_Question_3" />
-        <item itemvalue="Python.Part_A_Question_1" />
       </list>
     </recent_temporary>
   </component>
