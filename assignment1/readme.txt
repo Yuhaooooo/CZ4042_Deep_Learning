@@ -70,4 +70,5 @@ Assignment Part A:
 	The Python scripts for part A are in folder assignment1_question_a, the output of Python scripts include .npy files and image files
 		The .npy files are stored in others\npy
 		The image files are stored in others\Figures
-		The Jupyter Notebook Files are kept in others\Jupyter Notedbook Files
+		The Jupyter Notebook Files are kept in others\Jupyter Notedbook Files, the job performed by the Jupyter Notebook Files is identical to the Python scripts
+	Part_A_Question_1.py should be run in the first place since it performs a split in the original dataset such that the data is divided into train_data.npy and test_data.npy
