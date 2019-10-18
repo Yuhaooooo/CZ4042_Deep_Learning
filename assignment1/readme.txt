@@ -63,5 +63,11 @@ cz4042_LiGuanlong_Heyuhao_P1
 ----README.txt
 ----requirements.txt
 
+To install all the dependencies required, please execute the following command in the terminal:
+	pip install -r requirements.txt
 
-pip install requirements.txt
+Assignment Part A:
+	The Python scripts for part A are in folder assignment1_question_a, the output of Python scripts include .npy files and image files
+		The .npy files are stored in others\npy
+		The image files are stored in others\Figures
+		The Jupyter Notebook Files are kept in others\Jupyter Notedbook Files
