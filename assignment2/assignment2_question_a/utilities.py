@@ -144,10 +144,10 @@ def train(param):
             print('epoch', e + 1, 'entropy', loss_, 'accuracy', test_accuracy)
 
         if required == 'accuracies with feature maps':
-            ind = np.random.randint(low=0, high=10000)
-            image_1 = trainX[ind, :]
-            ind = np.random.randint(low=0, high=10000)
-            image_2 = trainX[ind, :]
+            ind = np.random.randint(low=0, high=2000)
+            image_1 = testX[ind, :]
+            ind = np.random.randint(low=0, high=2000)
+            image_2 = testX[ind, :]
             image_1_conv_1_feature_map = sess.run(conv_1, feed_dict={x: [image_1]})
             image_1_conv_2_feature_map = sess.run(conv_2, feed_dict={x: [image_1]})
             image_2_conv_1_feature_map = sess.run(conv_1, feed_dict={x: [image_2]})

@@ -33,6 +33,7 @@ def main():
         for j in conv_2_feature_map_num_choices:
             test_accuracies = results[index][0]
             training_costs = results[index][1]
+            # uncomment the below code block to plot training costs
             # plt.figure()
             # plt.plot(range(5000), training_costs)
             # plt.xlabel('Epochs')

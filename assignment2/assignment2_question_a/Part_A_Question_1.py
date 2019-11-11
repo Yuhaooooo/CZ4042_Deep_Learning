@@ -31,7 +31,7 @@ def main():
     plt.figure()
     plt.gray()
     image_1 = images_to_plot[0].reshape(NUM_CHANNELS, IMG_SIZE, IMG_SIZE).transpose(1, 2, 0)
-    plt.imshow(image_1)
+    plt.imshow(image_1.astype('uint8'))
     path = os.path.join('.', 'others', 'figures', 'Q1_TestImage1.png')
     plt.savefig(path, bbox_inches='tight', dpi=100)
 
@@ -43,7 +43,7 @@ def main():
     plt.figure()
     plt.gray()
     image_2 = images_to_plot[1].reshape(NUM_CHANNELS, IMG_SIZE, IMG_SIZE).transpose(1, 2, 0)
-    plt.imshow(image_2)
+    plt.imshow(image_2.astype('uint8'))
     path = os.path.join('.', 'others', 'figures', 'Q1_TestImage2.png')
     plt.savefig(path, bbox_inches='tight', dpi=100)
 
