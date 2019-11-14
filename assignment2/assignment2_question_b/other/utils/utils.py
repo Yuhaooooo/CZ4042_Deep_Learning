@@ -13,7 +13,7 @@ import os
 import sys
 
 no_words = 34016
-no_epochs = 30
+no_epochs = 3000
 
 class TimeRecoder():
     start_time = 0
