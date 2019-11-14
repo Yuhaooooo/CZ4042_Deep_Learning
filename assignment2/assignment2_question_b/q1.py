@@ -14,7 +14,7 @@ FILTER_SHAPE2 = [20, 1]
 POOLING_WINDOW = 4
 POOLING_STRIDE = 2
 MAX_LABEL = 15
-no_epochs = 5
+no_epochs = 3000
 lr = 0.01
 
 

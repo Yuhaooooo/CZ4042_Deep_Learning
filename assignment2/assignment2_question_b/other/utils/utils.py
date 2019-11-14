@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-no_words = 0
+no_words = 34016
 
 class TimeRecoder():
     start_time = 0
