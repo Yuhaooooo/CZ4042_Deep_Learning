@@ -16,7 +16,6 @@ POOLING_WINDOW = 4
 POOLING_STRIDE = 2
 MAX_LABEL = 15
 
-no_epochs = 50
 lr = 0.01
 
 
@@ -73,6 +72,9 @@ def char_cnn_model(x, withDropout):
 
 
 def train(withDropout):
+
+    global x_train, x_test, y_train, y_test, no_epochs
+
     # Create the model
     x = tf.placeholder(tf.int64, [None, MAX_DOCUMENT_LENGTH])
     y_ = tf.placeholder(tf.int64)
@@ -103,6 +105,8 @@ def train(withDropout):
     timeRecoder.start()
 
     for e in range(no_epochs):
+
+        x_train, y_train = shuffle(x_train, y_train)
         
         # training
         _, loss_  = sess.run([train_op, entropy], {x: x_train, y_: y_train})

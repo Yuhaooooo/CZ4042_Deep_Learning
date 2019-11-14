@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from sklearn.metrics import accuracy_score
+from sklearn.utils import shuffle
 import re
 import string
 from nltk.corpus import stopwords
@@ -12,6 +13,7 @@ import os
 import sys
 
 no_words = 34016
+no_epochs = 30
 
 class TimeRecoder():
     start_time = 0
