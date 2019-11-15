@@ -19,7 +19,7 @@ lr = 0.01
 
 MAX_DOCUMENT_LENGTH = 100
 EMBEDDING_SIZE = 20
-MAX_LABEL = 14
+MAX_LABEL = 15
 
 
 class TimeRecoder():
