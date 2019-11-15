@@ -12,7 +12,7 @@
 
 	1.2 CUDA Toolkit 10.0 and cuDNN v7.6.5 are required to run Python scripts which utilize GPU for training models
 
-	1.3 Run
+	1.3 For Part B, run
 		'''
 		python assignment2_question_b/other/utils/utils.py $ABSOLUTE_PATH_OF_DATA_DIRECTORY
 		'''
