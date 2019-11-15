@@ -12,6 +12,7 @@ HIDDEN_SIZE = 20
 MAX_LABEL = 15
 EMBEDDING_SIZE = 50
 
+num_layers=2
 lr = 0.01
 
 
@@ -22,8 +23,15 @@ def rnn_model(x, withDropout):
 
     word_list = tf.unstack(word_vectors, axis=1)
 
-    cell = tf.nn.rnn_cell.GRUCell(HIDDEN_SIZE)
-    _, encoding = tf.nn.static_rnn(cell, word_list, dtype=tf.float32)
+    def rnn_cell():
+        return tf.nn.rnn_cell.BasicRNNCell(num_units=HIDDEN_SIZE, activation=tf.nn.softsign)
+
+    stacked_rnn = tf.contrib.rnn.MultiRNNCell([rnn_cell() for _ in range(num_layers)])
+
+    encoding, _ = tf.nn.dynamic_rnn(cell=stacked_rnn,
+                                inputs=word_list,
+                                dtype=tf.float32)
+
 
     logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
     if withDropout:
@@ -92,7 +100,7 @@ def train(withDropout):
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy word cnn with dropout')
+        plt.title('entropy / accuracy')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
         plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_2rnn_withDropout.png'))  
@@ -105,7 +113,7 @@ def train(withDropout):
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy word cnn without dropout')
+        plt.title('entropy / accuracy')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
         plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_2rnn_withoutDropout.png'))  
