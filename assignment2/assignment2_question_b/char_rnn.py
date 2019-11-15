@@ -2,33 +2,34 @@ from other.utils.utils import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_word.npy'), allow_pickle=True)
-x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_word.npy'), allow_pickle=True)
-y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_word.npy'), allow_pickle=True)
-y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_word.npy'), allow_pickle=True)
+x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_char.npy'), allow_pickle=True)
+x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_char.npy'), allow_pickle=True)
+y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_char.npy'), allow_pickle=True)
+y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_char.npy'), allow_pickle=True)
 
-
+MAX_DOCUMENT_LENGTH = 100
 HIDDEN_SIZE = 20
+MAX_LABEL = 15
+EMBEDDING_SIZE = 50
+
+lr = 0.01
 
 
 def rnn_model(x, withDropout):
 
-    word_vectors = tf.contrib.layers.embed_sequence(
-        x, vocab_size=no_words, embed_dim=EMBEDDING_SIZE)
+    word_vectors = tf.reshape(
+      tf.one_hot(x, 256), [-1, MAX_DOCUMENT_LENGTH, 256])
 
     word_list = tf.unstack(word_vectors, axis=1)
 
-    cell1 = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
-    _, encoding1 = tf.nn.static_rnn(cell1, word_list, dtype=tf.float32)
+    cell = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
+    _, encoding = tf.nn.static_rnn(cell, word_list, dtype=tf.float32)
 
-    cell2 = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
-    _, encoding2 = tf.nn.static_rnn(cell2, cell1, dtype=tf.float32)
-
-    logits = tf.layers.dense(encoding2, MAX_LABEL, activation=None)
+    logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
     if withDropout:
         logits = tf.layers.dropout(logits)
 
-    return word_vectors, word_list, encoding2, logits
+    return word_vectors, word_list, encoding, logits
 
 
 def train(withDropout):
@@ -81,33 +82,34 @@ def train(withDropout):
         print('epoch %d: entropy: %f, accuracy: %f' % (e, entropy_on_training[-1], accuracy_on_testing[-1]))
         
     timeRecoder.end()
-
+    
     if withDropout:
 
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6b_withDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6b_withDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_rnn_entropy_on_training_withDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_rnn_accuracy_on_testing_withDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q6b with dropout')
+        plt.title('entropy / accuracy word cnn with dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6b_withDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_rnn_withDropout.png'))  
 
     else:
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6b_withoutDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6b_withoutDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_rnn_entropy_on_training_withoutDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_rnn_accuracy_on_testing_withoutDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q6b without dropout')
+        plt.title('entropy / accuracy word cnn without dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6b_withoutDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_rnn_withoutDropout.png'))  
+
 
 
 
