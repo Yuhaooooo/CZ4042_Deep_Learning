@@ -28,16 +28,11 @@ def rnn_model(x, withDropout):
 
     stacked_rnn = tf.contrib.rnn.MultiRNNCell([rnn_cell() for _ in range(num_layers)])
 
-    init_state = stacked_rnn.zero_state(MAX_DOCUMENT_LENGTH, tf.float32)
-
-    encoding, _ = tf.nn.dynamic_rnn(cell=stacked_rnn,
-                                inputs=word_list,
-                                initial_state = init_state,
-                                )
+    _, encoding = tf.nn.static_rnn(stacked_rnn, word_list, dtype=tf.float32)
 
 
-    logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
-    
+    logits = tf.layers.dense(encoding[1], MAX_LABEL, activation=None)
+
     if withDropout:
         logits = tf.layers.dropout(logits)
 

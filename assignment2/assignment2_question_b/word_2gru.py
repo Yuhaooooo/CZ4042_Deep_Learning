@@ -9,6 +9,7 @@ y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_word.npy'), allo
 
 
 HIDDEN_SIZE = 20
+num_layers = 2
 
 
 def rnn_model(x, withDropout):
@@ -18,10 +19,17 @@ def rnn_model(x, withDropout):
 
     word_list = tf.unstack(word_vectors, axis=1)
 
-    cell = tf.nn.rnn_cell.GRUCell(HIDDEN_SIZE)
-    _, encoding = tf.nn.static_rnn(cell, word_list, dtype=tf.float32)
 
-    logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
+    def rnn_cell():
+        return tf.nn.rnn_cell.GRUCell(num_units=HIDDEN_SIZE, activation=tf.nn.softsign)
+
+    stacked_rnn = tf.contrib.rnn.MultiRNNCell([rnn_cell() for _ in range(num_layers)])
+
+    _, encoding = tf.nn.static_rnn(stacked_rnn, word_list, dtype=tf.float32)
+
+
+    logits = tf.layers.dense(encoding[1], MAX_LABEL, activation=None)
+
     if withDropout:
         logits = tf.layers.dropout(logits)
 
