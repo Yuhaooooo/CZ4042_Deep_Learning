@@ -29,7 +29,7 @@ def rnn_model(x, withDropout):
 
     logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
     if withDropout:
-            logits = tf.layers.dropout(logits)
+        logits = tf.layers.dropout(logits)
 
     return word_vectors, word_list, encoding, logits
 
