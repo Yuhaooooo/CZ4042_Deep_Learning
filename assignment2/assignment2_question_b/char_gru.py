@@ -2,23 +2,27 @@ from other.utils.utils import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_word.npy'), allow_pickle=True)
-x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_word.npy'), allow_pickle=True)
-y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_word.npy'), allow_pickle=True)
-y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_word.npy'), allow_pickle=True)
+x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_char.npy'), allow_pickle=True)
+x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_char.npy'), allow_pickle=True)
+y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_char.npy'), allow_pickle=True)
+y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_char.npy'), allow_pickle=True)
 
-
+MAX_DOCUMENT_LENGTH = 100
 HIDDEN_SIZE = 20
+MAX_LABEL = 15
+EMBEDDING_SIZE = 50
+
+lr = 0.01
 
 
 def rnn_model(x, withDropout):
 
-    word_vectors = tf.contrib.layers.embed_sequence(
-        x, vocab_size=no_words, embed_dim=EMBEDDING_SIZE)
+    word_vectors = tf.reshape(
+      tf.one_hot(x, 256), [-1, MAX_DOCUMENT_LENGTH, 256])
 
     word_list = tf.unstack(word_vectors, axis=1)
 
-    cell = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
+    cell = tf.nn.rnn_cell.GRUCell(HIDDEN_SIZE)
     _, encoding = tf.nn.static_rnn(cell, word_list, dtype=tf.float32)
 
     logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
@@ -30,7 +34,7 @@ def rnn_model(x, withDropout):
 
 def train(withDropout):
 
-    global x_train, x_test, y_train, y_test
+    global x_train, x_test, y_train, y_test, no_epochs
 
     # Create the model
     x = tf.placeholder(tf.int64, [None, MAX_DOCUMENT_LENGTH])
@@ -81,30 +85,32 @@ def train(withDropout):
 
     if withDropout:
 
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6a1_withDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6a1_withDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_gru_entropy_on_training_withDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_gru_accuracy_on_testing_withDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q6a1 with dropout')
+        plt.title('entropy / accuracy word cnn with dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6a1_withDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_gru_withDropout.png'))  
 
     else:
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6a1_withoutDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6a1_withoutDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_gru_entropy_on_training_withoutDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'char_gru_accuracy_on_testing_withoutDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q6a1 without dropout')
+        plt.title('entropy / accuracy word cnn without dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6a1_withoutDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'char_gru_withoutDropout.png'))  
+
+
 
 
 

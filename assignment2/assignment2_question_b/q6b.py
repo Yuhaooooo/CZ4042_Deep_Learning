@@ -18,14 +18,17 @@ def rnn_model(x, withDropout):
 
     word_list = tf.unstack(word_vectors, axis=1)
 
-    cell = tf.nn.rnn_cell.GRUCell(HIDDEN_SIZE)
-    _, encoding = tf.nn.static_rnn(cell, word_list, dtype=tf.float32)
+    cell1 = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
+    _, encoding1 = tf.nn.static_rnn(cell1, word_list, dtype=tf.float32)
 
-    logits = tf.layers.dense(encoding, MAX_LABEL, activation=None)
+    cell2 = tf.nn.rnn_cell.BasicRNNCell(HIDDEN_SIZE)
+    _, encoding2 = tf.nn.static_rnn(cell2, cell1, dtype=tf.float32)
+
+    logits = tf.layers.dense(encoding2, MAX_LABEL, activation=None)
     if withDropout:
         logits = tf.layers.dropout(logits)
 
-    return word_vectors, word_list, encoding, logits
+    return word_vectors, word_list, encoding2, logits
 
 
 def train(withDropout):
@@ -81,30 +84,30 @@ def train(withDropout):
 
     if withDropout:
 
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q4_withDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q4_withDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6b_withDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6b_withDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q4 with dropout')
+        plt.title('entropy / accuracy q6b with dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q4_withDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6b_withDropout.png'))  
 
     else:
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q4_withoutDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q4_withoutDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q6b_withoutDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q6b_withoutDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q4 without dropout')
+        plt.title('entropy / accuracy q6b without dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q4_withoutDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q6b_withoutDropout.png'))  
 
 
 

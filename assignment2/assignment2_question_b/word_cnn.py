@@ -119,30 +119,31 @@ def train(withDropout):
 
     if withDropout:
 
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q2_withDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q2_withDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'word_cnn_entropy_on_training_withDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'word_cnn_accuracy_on_testing_withDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q2 with dropout')
+        plt.title('entropy / accuracy word cnn with dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q2_withDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'word_cnn_withDropout.png'))  
 
     else:
-        np.save(os.path.join(dir_path, 'other', 'npy', 'entropy_on_training_q2_withoutDropout.npy'), np.array(entropy_on_training))
-        np.save(os.path.join(dir_path, 'other', 'npy', 'accuracy_on_testing_q2_withoutDropout.npy'), np.array(accuracy_on_testing))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'word_cnn_entropy_on_training_withoutDropout.npy'), np.array(entropy_on_training))
+        np.save(os.path.join(dir_path, 'other', 'npy', 'word_cnn_accuracy_on_testing_withoutDropout.npy'), np.array(accuracy_on_testing))
 
         #plot
         plt.figure()
         plt.plot(entropy_on_training)
         plt.plot(accuracy_on_testing)
-        plt.title('entropy / accuracy q2 without dropout')
+        plt.title('entropy / accuracy word cnn without dropout')
         plt.xlabel('epoch')
         plt.legend(['entropy_on_training', 'accuracy_on_testing',], loc='upper left')
-        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'q2_withoutDropout.png'))  
+        plt.savefig(os.path.join(dir_path, 'other', 'figure', 'word_cnn_withoutDropout.png'))  
+
 
 
 
