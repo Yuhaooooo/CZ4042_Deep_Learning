@@ -14,6 +14,13 @@ import sys
 
 no_words = 34016
 no_epochs = 3000
+batch_size = 128
+lr = 0.01
+
+MAX_DOCUMENT_LENGTH = 100
+EMBEDDING_SIZE = 20
+MAX_LABEL = 14
+
 
 class TimeRecoder():
     start_time = 0
@@ -71,31 +78,31 @@ def clean_data(csv_path):
 	x_test = pd.Series(test_data.T[1])
 	y_test = pd.Series(test_data.T[0])
 
-	# # cnn features
+	# char features
 	char_processor = tf.contrib.learn.preprocessing.ByteProcessor(MAX_DOCUMENT_LENGTH)
-	x_train_cnn = np.array(list(char_processor.fit_transform(x_train)))
-	x_test_cnn = np.array(list(char_processor.transform(x_test)))
-	y_train_cnn = np.array(y_train.values)
-	y_test_cnn = np.array(y_test.values)
+	x_train_char = np.array(list(char_processor.fit_transform(x_train)))
+	x_test_char = np.array(list(char_processor.transform(x_test)))
+	y_train_char = np.array(y_train.values)
+	y_test_char = np.array(y_test.values)
 
-	np.save(os.path.join(dir_path, '..', 'npy', 'x_train_cnn.npy'), x_train_cnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'x_test_cnn.npy'), x_test_cnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'y_train_cnn.npy'), y_train_cnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'y_test_cnn.npy'), y_test_cnn)
+	np.save(os.path.join(dir_path, '..', 'npy', 'x_train_char.npy'), x_train_char)
+	np.save(os.path.join(dir_path, '..', 'npy', 'x_test_char.npy'), x_test_char)
+	np.save(os.path.join(dir_path, '..', 'npy', 'y_train_char.npy'), y_train_char)
+	np.save(os.path.join(dir_path, '..', 'npy', 'y_test_char.npy'), y_test_char)
 
 
-	# rnn features
+	# word features
 	vocab_processor=tf.contrib.learn.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
-	x_train_rnn = np.array(list(vocab_processor.fit_transform(x_train)))
-	x_test_rnn = np.array(list(vocab_processor.transform(x_test)))
-	y_train_rnn = np.array(y_train.values)
-	y_test_rnn = np.array(y_test.values)
+	x_train_word = np.array(list(vocab_processor.fit_transform(x_train)))
+	x_test_word = np.array(list(vocab_processor.transform(x_test)))
+	y_train_word = np.array(y_train.values)
+	y_test_word = np.array(y_test.values)
 	no_words = len(vocab_processor.vocabulary_)
 
-	np.save(os.path.join(dir_path, '..', 'npy', 'x_train_rnn.npy'), x_train_rnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'x_test_rnn.npy'), x_test_rnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'y_train_rnn.npy'), y_train_rnn)
-	np.save(os.path.join(dir_path, '..', 'npy', 'y_test_rnn.npy'), y_test_rnn)
+	np.save(os.path.join(dir_path, '..', 'npy', 'x_train_word.npy'), x_train_word)
+	np.save(os.path.join(dir_path, '..', 'npy', 'x_test_word.npy'), x_test_word)
+	np.save(os.path.join(dir_path, '..', 'npy', 'y_train_word.npy'), y_train_word)
+	np.save(os.path.join(dir_path, '..', 'npy', 'y_test_word.npy'), y_test_word)
 
 
 def main():

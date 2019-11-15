@@ -7,16 +7,12 @@ x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_cnn.npy'), allow
 y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_cnn.npy'), allow_pickle=True)
 y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_cnn.npy'), allow_pickle=True)
 
-MAX_DOCUMENT_LENGTH = 100
-EMBEDDING_SIZE = 20
+
 N_FILTERS = 10
 FILTER_SHAPE1 = [20, 20]
 FILTER_SHAPE2 = [20, 1]
 POOLING_WINDOW = 4
 POOLING_STRIDE = 2
-MAX_LABEL = 15
-
-lr = 0.01
 
 
 def char_cnn_model(x, withDropout):
