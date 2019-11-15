@@ -2,10 +2,10 @@ from other.utils.utils import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_cnn.npy'), allow_pickle=True)
-x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_cnn.npy'), allow_pickle=True)
-y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_cnn.npy'), allow_pickle=True)
-y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_cnn.npy'), allow_pickle=True)
+x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_word.npy'), allow_pickle=True)
+x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_word.npy'), allow_pickle=True)
+y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_word.npy'), allow_pickle=True)
+y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_word.npy'), allow_pickle=True)
 
 
 N_FILTERS = 10
@@ -16,19 +16,15 @@ POOLING_STRIDE = 2
 
 
 def char_cnn_model(x, withDropout):
-  
-    input_layer = tf.reshape(
-      tf.one_hot(x, 256), [-1, MAX_DOCUMENT_LENGTH, 256])
 
-    with tf.variable_scope('Embedding_Layer'):
-        W1 = tf.Variable(tf.truncated_normal([256, EMBEDDING_SIZE], stddev=2.0/np.sqrt(256)))
-        b1 = tf.Variable(tf.zeros([EMBEDDING_SIZE]))
-        embedding = tf.nn.relu(tf.matmul(input_layer, W1) + b1)
-        embedding = tf.reshape(embedding, [-1, MAX_DOCUMENT_LENGTH, EMBEDDING_SIZE, 1])
+    word_vectors = tf.contrib.layers.embed_sequence(
+        x, vocab_size=no_words, embed_dim=EMBEDDING_SIZE)
+  
+    input_layer = tf.reshape(word_vectors, [-1, MAX_DOCUMENT_LENGTH, EMBEDDING_SIZE, 1])
     
     with tf.variable_scope('CNN_Layer1'):
         conv1 = tf.layers.conv2d(
-            embedding,
+            input_layer,
             filters=N_FILTERS,
             kernel_size=FILTER_SHAPE1,
             padding='VALID',
@@ -64,7 +60,7 @@ def char_cnn_model(x, withDropout):
         if withDropout:
             logits = tf.layers.dropout(logits)
 
-    return input_layer, embedding, conv1, pool1, conv2, pool2, flatten, logits
+    return input_layer, input_layer, conv1, pool1, conv2, pool2, flatten, logits
 
 
 def train(withDropout):
@@ -75,7 +71,7 @@ def train(withDropout):
     x = tf.placeholder(tf.int64, [None, MAX_DOCUMENT_LENGTH])
     y_ = tf.placeholder(tf.int64)
 
-    inputs, embedding, conv1, pool1, conv2, pool2, flatten, logits = char_cnn_model(x, withDropout)
+    inputs, input_layer, conv1, pool1, conv2, pool2, flatten, logits = char_cnn_model(x, withDropout)
 
     # Optimizer
     entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.one_hot(y_, MAX_LABEL), logits=logits))
@@ -86,7 +82,7 @@ def train(withDropout):
     sess.run(tf.local_variables_initializer())
 
     print('input: ', sess.run([tf.shape(inputs)], {x: x_train, y_: y_train}))
-    print('embedding: ', sess.run([tf.shape(embedding)], {x: x_train, y_: y_train}))
+    print('input_layer: ', sess.run([tf.shape(input_layer)], {x: x_train, y_: y_train}))
     print('conv1: ', sess.run([tf.shape(conv1)], {x: x_train, y_: y_train}))
     print('pool1: ', sess.run([tf.shape(pool1)], {x: x_train, y_: y_train}))
     print('conv2: ', sess.run([tf.shape(conv2)], {x: x_train, y_: y_train}))
@@ -102,11 +98,15 @@ def train(withDropout):
 
     for e in range(no_epochs):
 
+        epoch_loss = []
         x_train, y_train = shuffle(x_train, y_train)
-        
+
         # training
-        _, loss_  = sess.run([train_op, entropy], {x: x_train, y_: y_train})
-        entropy_on_training.append(loss_)
+        for i in range(len(y_train)//batch_size):
+            _, loss_  = sess.run([train_op, entropy], {x: x_train[i*batch_size: (i+1)*batch_size], y_: y_train[i*batch_size: (i+1)*batch_size]})
+            epoch_loss.append(loss_)
+        
+        entropy_on_training.append(sum(epoch_loss)/len(epoch_loss))
         
         # testing
         predict = sess.run([logits], {x: x_test})
@@ -114,7 +114,7 @@ def train(withDropout):
         
         
         print('epoch %d: entropy: %f, accuracy: %f' % (e, entropy_on_training[-1], accuracy_on_testing[-1]))
-        
+    
     timeRecoder.end()
 
     if withDropout:

@@ -2,10 +2,10 @@ from other.utils.utils import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_rnn.npy'), allow_pickle=True)
-x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_rnn.npy'), allow_pickle=True)
-y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_rnn.npy'), allow_pickle=True)
-y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_rnn.npy'), allow_pickle=True)
+x_train = np.load(os.path.join(dir_path, 'other', 'npy', 'x_train_char.npy'), allow_pickle=True)
+x_test = np.load(os.path.join(dir_path, 'other', 'npy', 'x_test_char.npy'), allow_pickle=True)
+y_train = np.load(os.path.join(dir_path, 'other', 'npy', 'y_train_char.npy'), allow_pickle=True)
+y_test = np.load(os.path.join(dir_path, 'other', 'npy', 'y_test_char.npy'), allow_pickle=True)
 
 MAX_DOCUMENT_LENGTH = 100
 HIDDEN_SIZE = 20
@@ -16,11 +16,9 @@ lr = 0.01
 
 
 def rnn_model(x, withDropout):
-    
-    global no_words
 
-    word_vectors = tf.contrib.layers.embed_sequence(
-        x, vocab_size=no_words, embed_dim=EMBEDDING_SIZE)
+    word_vectors = tf.reshape(
+      tf.one_hot(x, 256), [-1, MAX_DOCUMENT_LENGTH, 256])
 
     word_list = tf.unstack(word_vectors, axis=1)
 
@@ -66,11 +64,15 @@ def train(withDropout):
 
     for e in range(no_epochs):
 
+        epoch_loss = []
         x_train, y_train = shuffle(x_train, y_train)
-        
+
         # training
-        _, loss_  = sess.run([train_op, entropy], {x: x_train, y_: y_train})
-        entropy_on_training.append(loss_)
+        for i in range(len(y_train)//batch_size):
+            _, loss_  = sess.run([train_op, entropy], {x: x_train[i*batch_size: (i+1)*batch_size], y_: y_train[i*batch_size: (i+1)*batch_size]})
+            epoch_loss.append(loss_)
+        
+        entropy_on_training.append(sum(epoch_loss)/len(epoch_loss))
         
         # testing
         predict = sess.run([logits], {x: x_test})
