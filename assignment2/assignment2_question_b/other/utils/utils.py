@@ -13,7 +13,7 @@ import os
 import sys
 
 no_words = 34016
-no_epochs = 3000
+no_epochs = 1000
 batch_size = 128
 lr = 0.01
 
